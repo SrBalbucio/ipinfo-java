@@ -1,23 +1,12 @@
 package io.ipinfo.api;
 
-import com.google.common.net.InetAddresses;
 import io.ipinfo.api.cache.Cache;
 import io.ipinfo.api.cache.SimpleCache;
 import io.ipinfo.api.context.Context;
 import io.ipinfo.api.errors.RateLimitedException;
 import io.ipinfo.api.model.IPResponseLite;
 import io.ipinfo.api.request.IPRequestLite;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.*;
 
 public class IPinfoLite {

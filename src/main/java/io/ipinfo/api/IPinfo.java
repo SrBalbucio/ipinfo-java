@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.*;
 
 public class IPinfo {
@@ -38,6 +37,9 @@ public class IPinfo {
             .setTimeoutPerBatch(batchReqTimeoutDefault)
             .build();
     private static final Gson gson = new Gson();
+    private static final MediaType JSON = MediaType.get(
+        "application/json; charset=utf-8"
+    );
 
     private final OkHttpClient client;
     private final Context context;
@@ -245,7 +247,7 @@ public class IPinfo {
         }
 
         // everything cached; exit early.
-        if (lookupUrls.size() == 0) {
+        if (lookupUrls.isEmpty()) {
             return result;
         }
 
@@ -275,7 +277,7 @@ public class IPinfo {
         // prepare latch & common request.
         // each request, when complete, will countdown the latch.
         CountDownLatch latch = new CountDownLatch(
-            (int) Math.ceil(lookupUrls.size() / 1000.0)
+            (int) Math.ceil(lookupUrls.size() / (double) batchSize)
         );
         Request.Builder reqCommon = new Request.Builder()
             .url(postUrl)
@@ -293,7 +295,7 @@ public class IPinfo {
 
             // prepare & queue up request.
             String urlListJson = gson.toJson(urlsChunk);
-            RequestBody requestBody = RequestBody.create(null, urlListJson);
+            RequestBody requestBody = RequestBody.create(urlListJson, JSON);
             Request req = reqCommon.post(requestBody).build();
             OkHttpClient chunkClient = client
                 .newBuilder()
@@ -305,59 +307,61 @@ public class IPinfo {
                 .enqueue(
                     new Callback() {
                         @Override
-                        @ParametersAreNonnullByDefault
                         public void onFailure(Call call, IOException e) {
                             latch.countDown();
                         }
 
                         @Override
-                        @ParametersAreNonnullByDefault
-                        public void onResponse(Call call, Response response)
-                            throws IOException {
-                            if (
-                                response.body() == null ||
-                                response.code() == 429
-                            ) {
-                                return;
-                            }
+                        public void onResponse(Call call, Response response) {
+                            try (Response r = response) {
+                                if (
+                                    r.body() == null || r.code() == 429
+                                ) {
+                                    return;
+                                }
 
-                            Type respType = new TypeToken<
-                                HashMap<String, Object>
-                            >() {}.getType();
-                            HashMap<String, Object> localResult = gson.fromJson(
-                                response.body().string(),
-                                respType
-                            );
-                            localResult.forEach(
-                                new BiConsumer<String, Object>() {
-                                    @Override
-                                    public void accept(String k, Object v) {
-                                        if (k.startsWith("AS")) {
-                                            String vStr = gson.toJson(v);
-                                            ASNResponse vCasted = gson.fromJson(
-                                                vStr,
-                                                ASNResponse.class
-                                            );
-                                            vCasted.setContext(context);
-                                            result.put(k, vCasted);
-                                        } else if (
-                                            InetAddresses.isInetAddress(k)
-                                        ) {
-                                            String vStr = gson.toJson(v);
-                                            IPResponse vCasted = gson.fromJson(
-                                                vStr,
-                                                IPResponse.class
-                                            );
-                                            vCasted.setContext(context);
-                                            result.put(k, vCasted);
-                                        } else {
-                                            result.put(k, v);
+                                Type respType = new TypeToken<
+                                    HashMap<String, Object>
+                                >() {}.getType();
+                                HashMap<String, Object> localResult =
+                                    gson.fromJson(
+                                        r.body().string(),
+                                        respType
+                                    );
+                                localResult.forEach(
+                                    new BiConsumer<String, Object>() {
+                                        @Override
+                                        public void accept(String k, Object v) {
+                                            if (k.startsWith("AS")) {
+                                                String vStr = gson.toJson(v);
+                                                ASNResponse vCasted = gson.fromJson(
+                                                    vStr,
+                                                    ASNResponse.class
+                                                );
+                                                vCasted.setContext(context);
+                                                result.put(k, vCasted);
+                                            } else if (
+                                                InetAddresses.isInetAddress(k)
+                                            ) {
+                                                String vStr = gson.toJson(v);
+                                                IPResponse vCasted = gson.fromJson(
+                                                    vStr,
+                                                    IPResponse.class
+                                                );
+                                                vCasted.setContext(context);
+                                                result.put(k, vCasted);
+                                            } else {
+                                                result.put(k, v);
+                                            }
                                         }
                                     }
-                                }
-                            );
-
-                            latch.countDown();
+                                );
+                            } catch (IOException e) {
+                                // Treat I/O failures reading a batch chunk
+                                // as a failed chunk; other chunks still count.
+                            } finally {
+                                latch.countDown();
+                            }
                         }
                     }
                 );
@@ -373,7 +377,7 @@ public class IPinfo {
                     TimeUnit.SECONDS
                 );
                 if (!success) {
-                    if (result.size() == 0) {
+                    if (result.isEmpty()) {
                         return null;
                     } else {
                         return result;
@@ -381,7 +385,7 @@ public class IPinfo {
                 }
             }
         } catch (InterruptedException e) {
-            if (result.size() == 0) {
+            if (result.isEmpty()) {
                 return null;
             } else {
                 return result;

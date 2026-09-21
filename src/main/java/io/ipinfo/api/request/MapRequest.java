@@ -9,6 +9,9 @@ import java.util.List;
 
 public class MapRequest extends BaseRequest<MapResponse> {
     private final static String URL = "https://ipinfo.io/tools/map";
+    private static final MediaType JSON = MediaType.get(
+        "application/json; charset=utf-8"
+    );
     private final List<String> ips;
 
     public MapRequest(OkHttpClient client, String token, List<String> ips) {
@@ -19,7 +22,7 @@ public class MapRequest extends BaseRequest<MapResponse> {
     @Override
     public MapResponse handle() throws RateLimitedException {
         String jsonIpList = gson.toJson(ips);
-        RequestBody requestBody = RequestBody.create(null, jsonIpList);
+        RequestBody requestBody = RequestBody.create(jsonIpList, JSON);
         Request.Builder request = new Request.Builder().url(URL).post(requestBody);
 
         try (Response response = handleRequest(request)) {
