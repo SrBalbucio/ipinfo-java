@@ -1,3 +1,10 @@
+# 3.5.0
+
+- Migrate OkHttp 4.12.0 to 5.5.0 (`okhttp-jvm`; `okio-jvm` 3.18.1)
+- Update gson to 2.14.0, guava to 33.7.1-jre, JUnit to 5.14.4
+- Fix batch requests hanging on HTTP 429/empty bodies and leaking connections
+- Replace deprecated `RequestBody.create(null, ...)` with JSON media type
+
 # 3.4.0
 
 - Update Bulgaria currency from BGN to EUR

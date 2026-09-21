@@ -7,7 +7,7 @@
 
     <groupId>io.ipinfo</groupId>
     <artifactId>ipinfo-api</artifactId>
-    <version>3.4.0</version>
+    <version>3.5.0</version>
     <packaging>jar</packaging>
 
     <organization>
@@ -34,6 +34,19 @@
         <system>GitHub</system>
         <url>https://github.com/ipinfo/java/issues</url>
     </issueManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>hyperpowered-maven-releases</id>
+            <name>HyperPowered Maven Repository</name>
+            <url>https://maven.dev.hyperpowered.net/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>hyperpowered-maven-snapshots</id>
+            <name>HyperPowered Maven Repository</name>
+            <url>https://maven.dev.hyperpowered.net/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <licenses>
         <license>
