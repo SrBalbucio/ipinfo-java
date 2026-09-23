@@ -1,3 +1,12 @@
+# 3.5.1
+
+- Fix `NoSuchMethodError: okio.ByteString.base64$default` when the consumer's
+  classpath contains an old okio (1.x/2.x) shadowing `okio-jvm` 3.x: stop using
+  `okhttp3.Credentials.basic` (Kotlin/okio path) and build the Basic auth header
+  with JDK `java.util.Base64` instead (`BaseRequest.basicAuth`)
+- Pin `com.squareup.okio:okio-jvm:3.18.1` explicitly (matching `okhttp-jvm`
+  5.5.0) so dependency mediation prefers okio 3 over stale transitives
+
 # 3.5.0
 
 - Migrate OkHttp 4.12.0 to 5.5.0 (`okhttp-jvm`; `okio-jvm` 3.18.1)

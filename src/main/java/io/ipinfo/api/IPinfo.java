@@ -12,6 +12,7 @@ import io.ipinfo.api.model.IPResponse;
 import io.ipinfo.api.model.MapResponse;
 import io.ipinfo.api.model.ResproxyResponse;
 import io.ipinfo.api.request.ASNRequest;
+import io.ipinfo.api.request.BaseRequest;
 import io.ipinfo.api.request.IPRequest;
 import io.ipinfo.api.request.MapRequest;
 import io.ipinfo.api.request.ResproxyRequest;
@@ -282,8 +283,8 @@ public class IPinfo {
         Request.Builder reqCommon = new Request.Builder()
             .url(postUrl)
             .addHeader("Content-Type", "application/json")
-            .addHeader("Authorization", Credentials.basic(token, ""))
-            .addHeader("User-Agent", "IPinfoClient/Java/3.5.0");
+            .addHeader("Authorization", BaseRequest.basicAuth(token))
+            .addHeader("User-Agent", "IPinfoClient/Java/3.5.1");
 
         for (int i = 0; i < lookupUrls.size(); i += batchSize) {
             // create chunk.

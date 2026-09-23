@@ -7,7 +7,7 @@
 
     <groupId>io.ipinfo</groupId>
     <artifactId>ipinfo-api</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.1</version>
     <packaging>jar</packaging>
 
     <organization>
@@ -19,6 +19,11 @@
         <maven.compiler.release>8</maven.compiler.release>
         <gson.version>2.14.0</gson.version>
         <okhttp.version>5.5.0</okhttp.version>
+        <!-- Must match the okio version required by okhttp-jvm ${okhttp.version}.
+            Declared explicitly (not just transitively) so Maven's nearest-wins
+            mediation prefers okio 3 over an old okio 1.x/2.x coming from other
+            dependencies in the consumer's classpath. -->
+        <okio.version>3.18.1</okio.version>
         <guava.version>33.7.1-jre</guava.version>
         <junit.version>5.14.4</junit.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
@@ -86,6 +91,12 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp-jvm</artifactId>
             <version>${okhttp.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio-jvm</artifactId>
+            <version>${okio.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
